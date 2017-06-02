@@ -54,14 +54,13 @@ void signinPost(Response& response, Request& request) {
 	Database *db = Database::getInstance();
 	string username = request.body["username"];
 	string password = request.body["password"];
-
+    Document d;
+    d.SetObject();
 	int uid = db->signin(username, password);
-    bool status;
+
 	if (!uid) {
-		cout << "sign in failed" << endl;
-        status = false;
+        d.AddMember("status", false, d.GetAllocator());
 	}else{
-        status = true;
         Session session;
         SessionInfo info;
         info.UID = uid;
@@ -73,21 +72,13 @@ void signinPost(Response& response, Request& request) {
         t = t + 30*24*60*60;
         response.setCookies("UID",to_string(uid));
         response.setCookies("token",sessionkey,t);
+        d.AddMember("status", true, d.GetAllocator());
     }
 
 
-	Document d;
-	d.SetObject();
-	Value statusValue;
-	statusValue.SetBool(status);
-	d.AddMember("status", statusValue, d.GetAllocator());
-	Value href;
-	href = "/";
-	d.AddMember("href",href,d.GetAllocator());
-
 	string content;
 	Json2String(d, content);
-
+    response.type = "application/json";
 	response.body << content;
 }
 

@@ -66,15 +66,14 @@ void signupPost(Response& response, Request& request) {
 
 	string username = request.body["username"];
 	string pass = request.body["password"];
+	Document d;
+	d.SetObject();
 
-	bool status;
 	//添加到数据库
 	int uid = db->addUser(username, pass);
 	if (!uid) {
-		cout << "注册失败" << endl;
-		status = false;
+		d.AddMember("status", false, d.GetAllocator());
 	}else{
-		status = true;
 		Session session;
 		SessionInfo info;
 		info.UID = uid;
@@ -85,27 +84,12 @@ void signupPost(Response& response, Request& request) {
 		t = t + 30*24*60*60;
 		response.setCookies("UID",to_string(uid));
 		response.setCookies("token",sessionkey,t);
-
+		d.AddMember("status", true, d.GetAllocator());
 	}
 
 	string resContent;
-	/*
-	stringstream s;
-	s << "user: " << username << endl;
-	s << "password: " << pass << endl;
-	resContent = s.str();
-	*/
-	Document d;
-	d.SetObject();
-	Value statusValue;
-	statusValue.SetBool(status);
-	d.AddMember("status", statusValue, d.GetAllocator());
-	Value href;
-	href = "/";
-	d.AddMember("href",href,d.GetAllocator());
-
 	Json2String(d, resContent);
-
+	response.type = "application/json";
 	response.body << resContent;
 
 }

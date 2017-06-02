@@ -25,19 +25,20 @@ void updateNotePost(Response& response, Request& request){
             throw IncorrectSessionException();
         }
 
-        if(request.body.find("nid") == request.body.end() ||
-                request.body.find("title") == request.body.end() ||
-                request.body.find("content") == request.body.end()){
+        Document data;
+        String2Json(request.body["raw"],data);
+        if(!data.HasMember("nid") || !data.HasMember("title") || !data.HasMember("content")){
             throw IncorrectDataException();
         }
 
-        int nid = atoi(request.body["nid"].c_str());
+        int nid = data["nid"].GetInt();
 
         if(!db->checkNoteOwner(nid,info->UID)){
             throw IncorrectDataException();
         }
-
-        db->updateNote(nid,request.body["title"],request.body["content"],0);
+        string title(data["title"].GetString(),data["title"].GetStringLength());
+        string content(data["content"].GetString(),data["content"].GetStringLength());
+        db->updateNote(nid,title,content,0);
 
         d.AddMember("status",true,d.GetAllocator());
     }catch(IncorrectSessionException const& e){
@@ -57,6 +58,10 @@ void updateNotePost(Response& response, Request& request){
         Value message;
         message.SetString(e.what(),d.GetAllocator());
         d.AddMember("message", message, d.GetAllocator());
+    }catch(...){
+        d.AddMember("status", false, d.GetAllocator());
+        Value message;
+        d.AddMember("message", "unknown error", d.GetAllocator());
     }
     string res;
     Json2String(d, res);

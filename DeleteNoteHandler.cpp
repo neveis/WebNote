@@ -24,11 +24,13 @@ void deleteNotePost(Response& response, Request& request){
             throw IncorrectSessionException();
         }
 
-        if(request.body.find("nid") == request.body.end()){
+        Document data;
+        String2Json(request.body["raw"],data);
+        if(!data.HasMember("nid")){
             throw IncorrectDataException();
         }
 
-        int nid = atoi(request.body["nid"].c_str());
+        int nid = data["nid"].GetInt();
 
         if(!db->checkNoteOwner(nid,info->UID)){
             throw IncorrectDataException();
@@ -53,6 +55,10 @@ void deleteNotePost(Response& response, Request& request){
         Value message;
         message.SetString(e.what(),d.GetAllocator());
         d.AddMember("message", message, d.GetAllocator());
+    }catch(...){
+        d.AddMember("status", false, d.GetAllocator());
+        Value message;
+        d.AddMember("message", "unknown error", d.GetAllocator());
     }
     string res;
     Json2String(d, res);

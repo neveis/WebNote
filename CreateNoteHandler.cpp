@@ -24,13 +24,15 @@ void createNotePost(Response& response, Request& request){
             throw IncorrectSessionException();
         }
 
-        if (request.body.find("title") == request.body.end() ||
-            request.body.find("content") == request.body.end()){
+        Document data;
+        String2Json(request.body["raw"],data);
+        if(!data.HasMember("title") || !data.HasMember("content")){
             throw IncorrectDataException();
         }
 
-        string &title = request.body["title"];
-        string &content = request.body["content"];
+        string title(data["title"].GetString(),data["title"].GetStringLength());
+        string content(data["content"].GetString(),data["content"].GetStringLength());
+
         Database *db = Database::getInstance();
         int nid = db->createNote(info->UID, title, content, 0);
 
@@ -43,10 +45,19 @@ void createNotePost(Response& response, Request& request){
         nidValue.SetInt(nid);
         d.AddMember("status", status, d.GetAllocator());
         d.AddMember("nid", nidValue, d.GetAllocator());
-        string res;
-        Json2String(d, res);
-        response.type = "application/json";
-        response.body << res;
+
+    }catch(IncorrectSessionException const& e){
+        d.AddMember("status", false, d.GetAllocator());
+        Value message;
+        message.SetString(e.what(),d.GetAllocator());
+        d.AddMember("message", message, d.GetAllocator());
+
+        time_t t;
+        time(&t);
+        t -= 60*60*24;
+        response.setCookies("UID","",t);
+        response.setCookies("token","",t);
+
     }catch(exception const& e){
         Value status;
         status.SetBool(false);
@@ -54,11 +65,16 @@ void createNotePost(Response& response, Request& request){
         message.SetString(e.what(),d.GetAllocator());
         d.AddMember("status", status, d.GetAllocator());
         d.AddMember("message", message, d.GetAllocator());
-        string res;
-        Json2String(d, res);
-        response.type = "application/json";
-        response.body << res;
+    }catch(...){
+        d.AddMember("status", false, d.GetAllocator());
+        Value message;
+        d.AddMember("message", "unknown error", d.GetAllocator());
     }
+
+    string res;
+    Json2String(d, res);
+    response.type = "application/json";
+    response.body << res;
 }
 
 CreateNoteHandler::CreateNoteHandler(MyWeb::Server<MyWeb::HTTP> &server) {
