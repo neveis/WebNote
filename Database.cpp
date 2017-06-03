@@ -139,6 +139,20 @@ int Database::getUserId(const string &userName) {
     return uid;
 }
 
+string Database::getUserName(int uid) {
+    redisReply *reply;
+    reply = (redisReply*)redisCommand(db,"GET user:%d:username",uid);
+    string username;
+    if(reply->type == REDIS_REPLY_NIL || reply->type == REDIS_REPLY_ERROR){
+        username = "";
+    }else{
+        username = reply->str;
+    }
+    freeReplyObject(reply);
+
+    return username;
+}
+
 long Database::createNote(int uid, string &title, string &content,int did) {
     redisReply * reply;
     int nid;
@@ -325,3 +339,5 @@ bool Database::checkNoteOwner(int nid, int uid) {
         return false;
     }
 }
+
+

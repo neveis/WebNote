@@ -20,6 +20,7 @@ public:
 
     bool checkUserExist(string& userName);
     int getUserId(const string& userName);
+	string getUserName(int uid);
     int addUser(string& userName,string& password);
     int signin(const string& userName,const string& password);
 

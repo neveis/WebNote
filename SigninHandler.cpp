@@ -50,6 +50,53 @@ void signinGet(Response& response, Request& request) {
 	}
 }
 
+void verityTokenPost(Response& response, Request& request){
+    Database *db = Database::getInstance();
+    Session session;
+    Document d;
+    d.SetObject();
+    try{
+        if (request.cookies.find("token") == request.cookies.end() ||
+            request.cookies.find("UID") == request.cookies.end()){
+            d.AddMember("status",false,d.GetAllocator());
+        }else{
+            SessionInfo *info = session.GetSessionInfo(request.cookies["token"]);
+            if (info == nullptr || info->UID != atoi(request.cookies["UID"].c_str())) {
+                throw IncorrectSessionException();
+            }
+
+            string username = db->getUserName(info->UID);
+            if(username.size()){
+                d.AddMember("status",true,d.GetAllocator());
+                Value name;
+                name.SetString(username.c_str(),d.GetAllocator());
+                d.AddMember("username",name,d.GetAllocator());
+            }else{
+                d.AddMember("status",false,d.GetAllocator());
+            }
+        }
+    }catch(IncorrectSessionException const& e){
+        d.AddMember("status", false, d.GetAllocator());
+        Value message;
+        message.SetString(e.what(),d.GetAllocator());
+        d.AddMember("message", message, d.GetAllocator());
+
+        time_t t;
+        time(&t);
+        t -= 60*60*24;
+        response.setCookies("UID","",t);
+        response.setCookies("token","",t);
+
+    }catch(...){
+        d.AddMember("status",false,d.GetAllocator());
+    }
+
+    string content;
+    Json2String(d, content);
+    response.type = "application/json";
+    response.body << content;
+}
+
 void signinPost(Response& response, Request& request) {
 	Database *db = Database::getInstance();
 	string username = request.body["username"];
@@ -75,7 +122,6 @@ void signinPost(Response& response, Request& request) {
         d.AddMember("status", true, d.GetAllocator());
     }
 
-
 	string content;
 	Json2String(d, content);
     response.type = "application/json";
@@ -84,8 +130,9 @@ void signinPost(Response& response, Request& request) {
 
 SigninHandler::SigninHandler(MyWeb::Server<MyWeb::HTTP> & server)
 {
-	server.resource["^/signin/?$"]["GET"] = signinGet;
 	server.resource["^/signin/?$"]["POST"] = signinPost;
+    server.resource["^/verity/?$"]["POST"] = verityTokenPost;
+
 }
 
 

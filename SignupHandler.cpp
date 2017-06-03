@@ -64,27 +64,60 @@ void signupPost(Response& response, Request& request) {
 
 	Database *db = Database::getInstance();
 
-	string username = request.body["username"];
-	string pass = request.body["password"];
+
 	Document d;
 	d.SetObject();
 
-	//添加到数据库
-	int uid = db->addUser(username, pass);
-	if (!uid) {
-		d.AddMember("status", false, d.GetAllocator());
-	}else{
-		Session session;
-		SessionInfo info;
-		info.UID = uid;
-		SessionKeyType sessionkey = session.CreateSession(info);
+	try{
+		if(request.body.find("username") == request.body.end() ||
+				request.body.find("password") == request.body.end()){
+			throw IncorrectDataException();
+		}
 
-		time_t t;
-		time(&t);
-		t = t + 30*24*60*60;
-		response.setCookies("UID",to_string(uid));
-		response.setCookies("token",sessionkey,t);
-		d.AddMember("status", true, d.GetAllocator());
+		string username = request.body["username"];
+		string pass = request.body["password"];
+
+		if(pass.size()<8){
+			throw IncorrectDataException();
+		}
+
+		regex e("[a-zA-Z0-9]+");
+		smatch match;
+		if(regex_match(username,match,e)){
+			if(match[0] != username){
+				throw IncorrectDataException();
+			}
+		}else{
+			throw IncorrectDataException();
+		}
+
+		//添加到数据库
+		int uid = db->addUser(username, pass);
+		if (!uid) {
+			d.AddMember("status", false, d.GetAllocator());
+			d.AddMember("message", "database error", d.GetAllocator());
+		}else{
+			Session session;
+			SessionInfo info;
+			info.UID = uid;
+			SessionKeyType sessionkey = session.CreateSession(info);
+
+			time_t t;
+			time(&t);
+			t = t + 30*24*60*60;
+			response.setCookies("UID",to_string(uid));
+			response.setCookies("token",sessionkey,t);
+			d.AddMember("status", true, d.GetAllocator());
+		}
+	}catch(exception const& e){
+		d.AddMember("status", false, d.GetAllocator());
+		Value message;
+		message.SetString(e.what(),d.GetAllocator());
+		d.AddMember("message", message, d.GetAllocator());
+	}catch(...){
+		d.AddMember("status", false, d.GetAllocator());
+		Value message;
+		d.AddMember("message", "unknown error", d.GetAllocator());
 	}
 
 	string resContent;
@@ -94,9 +127,39 @@ void signupPost(Response& response, Request& request) {
 
 }
 
+void checkUserNamePost(Response& response, Request& request){
+	Database *db = Database::getInstance();
+	Session session;
+	Document d;
+	d.SetObject();
+	try{
+		if(request.body.find("username") == request.body.end()){
+			throw IncorrectDataException();
+		}
+
+		if(db->checkUserExist(request.body["username"])){
+			d.AddMember("status",false,d.GetAllocator());
+		}else{
+			d.AddMember("status",true,d.GetAllocator());
+		}
+	}catch(exception const& e){
+		d.AddMember("status", false, d.GetAllocator());
+		Value message;
+		message.SetString(e.what(),d.GetAllocator());
+		d.AddMember("message", message, d.GetAllocator());
+	}catch(...){
+		d.AddMember("status",false,d.GetAllocator());
+		d.AddMember("message", "unknown error", d.GetAllocator());
+	}
+
+	string content;
+	Json2String(d, content);
+	response.type = "application/json";
+	response.body << content;
+}
 
 SignupHandler::SignupHandler(Server<HTTP> & server)
 {
-	server.resource["^/signup/?$"]["GET"] = signupGet;
 	server.resource["^/signup/?$"]["POST"] = signupPost;
+	server.resource["^/checkuname/?$"]["POST"] = checkUserNamePost;
 }

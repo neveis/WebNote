@@ -43,6 +43,9 @@ namespace MyWeb {
 				case 400:
 					*writeBuf << "HTTP/1.1 400 Bad Request\r\n";
 					break;
+				case 404:
+					*writeBuf << "HTTP/1.1 404 Not Found\r\n";
+					break;
 				case 302:
 					*writeBuf << "HTTP/1.1 302 Found\r\n";
 					break;

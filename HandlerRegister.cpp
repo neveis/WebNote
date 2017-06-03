@@ -35,13 +35,14 @@ HandlerRegister::HandlerRegister(MyWeb::Server<MyWeb::HTTP> & server)
 		string path = request.path_match[1];
 
 		// 防止使用 `..` 来访问 web/ 目录外的内容
-		size_t last_pos = path.rfind(".");
-		size_t current_pos = 0;
-		size_t pos;
-		while ((pos = path.find('.', current_pos)) != string::npos && pos != last_pos) {
-			current_pos = pos;
-			path.erase(pos, 1);
-			last_pos--;
+		int pos =0;
+		while ((pos = path.find(".", pos)) != string::npos) {
+			if (path[pos] == '.' && path[pos + 1] == '.') {
+				path.erase(pos, 2);
+			}
+			else {
+				pos++;
+			}
 		}
 
 		boost::filesystem::path filename("www");
@@ -77,9 +78,7 @@ HandlerRegister::HandlerRegister(MyWeb::Server<MyWeb::HTTP> & server)
 		}
 		else {
 			// 文件不存在时，返回无法打开文件
-			string content = "Could not open file " + filename.string();
-			response.status = 400;
-			response.body << content;
+			response.status = 404;
 		}
 	};
 }
