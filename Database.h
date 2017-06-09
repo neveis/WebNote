@@ -36,6 +36,8 @@ private:
 	Database& operator=(const Database&) {};
 	string generateSalt();
 	string sha1(string &str);
+    void databaseInit();
+
 	static Database* instance;
 
 

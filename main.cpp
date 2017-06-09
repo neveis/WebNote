@@ -9,7 +9,7 @@ int main(){
     HandlerRegister *hr = new HandlerRegister(server);
 	delete hr;
 
-    std::cout << "server start" << std::endl;
+    std::cout << "server start on 10080" << std::endl;
 	server.start();
 	
 	return 0;

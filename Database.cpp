@@ -25,6 +25,32 @@ Database::Database()
     db = redisConnectWithTimeout(hostname, port, timeout);
     if (db == NULL || db->err) {
         std::cout << "Redis connect error" << std::endl;
+        exit(1);
+    }
+    //databaseInit();
+}
+
+void Database::databaseInit() {
+    //运行此段代码，会出现段错误，未找到原因
+    redisReply *reply;
+
+    reply = (redisReply*)redisCommand(db,"GET user:uid");
+    if(reply->type == REDIS_REPLY_NIL){
+        freeReplyObject(reply);
+        reply = (redisReply*)redisCommand(db,"SET user:uid 1000");
+        freeReplyObject(reply);
+    }else{
+        freeReplyObject(reply);
+    }
+
+
+    reply = (redisReply*)redisCommand(db,"GET note:nid");
+    if(reply->type == REDIS_REPLY_NIL){
+        freeReplyObject(reply);
+        reply = (redisReply*)redisCommand(db,"SET note:nid 1000");
+        freeReplyObject(reply);
+    }else {
+        freeReplyObject(reply);
     }
 }
 
@@ -339,5 +365,4 @@ bool Database::checkNoteOwner(int nid, int uid) {
         return false;
     }
 }
-
 
