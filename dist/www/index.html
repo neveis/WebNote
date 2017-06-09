@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <meta name="description" content="Online Note">
+    <meta name="author" content="Neveis">
+    <meta name="robots" content="noindex">
+
+    <title>Index</title>
+    <!--<link rel="shortcut icon" href="/" />-->
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.min.js">
+    </script>
+    <script src="https://cdn.bootcss.com/vue/2.3.3/vue.min.js"></script>
+    <link rel="stylesheet" href="static/css/uikit.min.css" />
+    <link rel="stylesheet" href="static/css/note.css">
+    <link rel="stylesheet" href="static/css/components/notify.min.css">
+    <script src="static/js/uikit.min.js"></script>
+    <script src="static/js/components/notify.min.js"></script>
+</head>
+
+<body>
+<div id="app" class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+    <div class="uk-width-1-1 uk-text-center uk-row-first">
+        <h1 class="uk-heading-large">Note</h1>
+    </div>
+    <nav class="uk-navbar">
+        <ul class="uk-navbar-nav">
+            <li v-if="isSignIn"><a>{{ username }}</a></li>
+            <li v-if="isSignIn"><a v-on:click="createNote($event)">New</a></li>
+        </ul>
+        <div class="uk-navbar-flip">
+            <ul class="uk-navbar-nav">
+                <li v-if="isSignIn"><a v-on:click="signout">Sign Out</a></li>
+                <li v-if="!isSignIn"><a href="#signup-modal" data-uk-modal>Sign Up</a></li>
+                <li v-if="!isSignIn"><a href="#signin-modal" data-uk-modal>Sign In</a></li>
+            </ul>
+        </div>
+    </nav>
+    <!--
+    <div id="nav">
+        <div v-if="!isSignIn">
+            <span><a  href="#signup-modal" data-uk-modal>Sign Up</a></span> |
+            <span><a  href="#signin-modal" data-uk-modal>Sign In</a></span>
+        </div>
+        <div v-else>
+            <a class="btn btn-primary" v-on:click="signout">Sign Out</a>
+        </div>
+    </div>
+    -->
+    <div class="container">
+        <!--
+        <div class="note">
+            <input type="text"><br>
+            <textarea></textarea>
+        </div>
+        -->
+        <!--<button v-on:click="createNote($event)">New</button>-->
+        <div class="uk-grid uk-container-center">
+                <note v-for="(note,index) in notes" :key="note.nid" :note="note" v-bind:x="index" :index="index" v-on:remove="deleteNote"></note>
+        </div>
+    </div>
+
+    <div v-if="!isSignIn" id="signin-modal" class="uk-modal">
+        <div class="uk-modal-dialog" style="width: 440px;">
+            <button type=" button " class="uk-modal-close uk-close "></button>
+            <div class="uk-modal-header "></div>
+            <div>
+                <form class="form-signin" method="POST" role="form">
+                    <h2 class="form-signin-heading">Sign In</h2>
+                    <input type="text" name="account" class="form-control" placeholder="User Name" required autofocus>
+                    <input type="password" name="password" class="form-control" placeholder="Password" required>
+                    <!--
+        <div class="checkbox">
+            <label>
+        <input type="checkbox" value="remember-me"> Remember me
+      </label>
+        </div>
+        -->
+                </form>
+            </div>
+            <div class="uk-modal-footer uk-text-right ">
+                <button type="button" class="uk-button uk-button-primary " v-on:click="signin">Sign In</button>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="!isSignIn" id="signup-modal" class="uk-modal">
+        <div class="uk-modal-dialog" style="width: 440px;">
+            <button type=" button " class="uk-modal-close uk-close "></button>
+            <div class="uk-modal-header "></div>
+            <div>
+                <form class="form-signup" role="form">
+                    <h2 class="form-reg-heading">Sign Up</h2>
+                    <div class="alert-inline">
+                        <input type="text" name="username" class="form-control" placeholder="User Name" required autofocus>
+                        <div class="reg-alert n-alert" style="display: inline-block">
+                        </div>
+                    </div>
+                    <input type="password" name="password" class="form-control" placeholder="Password" required>
+                    <div class="alert-inline">
+                        <input type="password" name="cpassword" class="form-control" placeholder="Password" required>
+                        <div class="reg-alert cp-alert" style="display: inline-block">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="uk-modal-footer uk-text-right ">
+                <button type="button " class="uk-button uk-button-primary" v-on:click="signup">Sign Up</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+
+
+
+<script src="static/js/main.js"></script>
+
+</html>

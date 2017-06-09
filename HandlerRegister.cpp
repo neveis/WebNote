@@ -1,5 +1,4 @@
 #include <fstream>
-#include <cstdio>
 #include "HandlerRegister.h"
 #include "HandlerConfigure.h"
 #include <boost/filesystem.hpp>

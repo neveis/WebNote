@@ -1,0 +1,8 @@
+@media (min-width: 1220px) {
+    .uk-container {
+        max-width: 1025px;
+    }
+}
+.note{
+    padding-top: 25px;
+}
