@@ -222,12 +222,15 @@ namespace MyWeb {
 								//解析body
 								std::regex r("^(.*?)=(.*?)(&|$)");
 								std::smatch match;
-								std::string strTemp;
-								*request->content >> strTemp;
-								request->body["raw"] = strTemp;
+                                std::string &rawstr = request->body["raw"];
+                                std::string strTemp;
+                                while(std::getline(*request->content,strTemp)) {
+                                    rawstr.append(strTemp);
+                                }
+                                strTemp = rawstr;
 								while (regex_search(strTemp, match, r)) {
 									request->body[match[1]] = match[2];
-									strTemp = match.suffix();
+                                    strTemp = match.suffix();
 								}
 								respond(socket,request);
 							}
