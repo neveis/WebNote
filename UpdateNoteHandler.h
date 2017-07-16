@@ -10,8 +10,6 @@ class UpdateNoteHandler :public Handler{
 public:
     UpdateNoteHandler(MyWeb::Server<MyWeb::HTTP> & server);
     ~UpdateNoteHandler();
-private:
-    NO_COPYABLE(UpdateNoteHandler)
 };
 
 

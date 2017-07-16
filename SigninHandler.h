@@ -5,7 +5,5 @@ class SigninHandler :public Handler
 public:
 	SigninHandler(MyWeb::Server<MyWeb::HTTP> & server);
 	~SigninHandler();
-private:
-	NO_COPYABLE(SigninHandler)
 };
 

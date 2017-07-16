@@ -11,8 +11,6 @@ class SignoutHandler : public Handler {
 public:
     SignoutHandler(MyWeb::Server<MyWeb::HTTP> & server);
     ~SignoutHandler();
-private:
-    NO_COPYABLE(SignoutHandler)
 };
 
 

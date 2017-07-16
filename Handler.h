@@ -26,7 +26,8 @@ public:
 	virtual ~Handler() {};
 
 private:
-	NO_COPYABLE(Handler)
+	Handler(const Handler&) = delete;
+	Handler& operator=(const Handler&) = delete;
 };
 
 void String2Json(std::string const& str, rapidjson::Document &d);

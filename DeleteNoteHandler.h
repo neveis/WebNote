@@ -10,8 +10,6 @@ class DeleteNoteHandler :public Handler{
 public:
     DeleteNoteHandler(MyWeb::Server<MyWeb::HTTP> & server);
     ~DeleteNoteHandler();
-private:
-    NO_COPYABLE(DeleteNoteHandler)
 };
 
 

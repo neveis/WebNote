@@ -10,8 +10,6 @@ class FetchNoteHandler :public Handler{
 public:
     FetchNoteHandler(MyWeb::Server<MyWeb::HTTP> & server);
     ~FetchNoteHandler();
-private:
-    NO_COPYABLE(FetchNoteHandler)
 };
 
 

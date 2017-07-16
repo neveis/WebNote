@@ -11,8 +11,6 @@ class CreateNoteHandler:public Handler {
 public:
     CreateNoteHandler(MyWeb::Server<MyWeb::HTTP> & server);
     ~CreateNoteHandler();
-private:
-    NO_COPYABLE(CreateNoteHandler)
 };
 
 

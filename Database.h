@@ -32,8 +32,8 @@ public:
     bool deleteNote(int nid);
 private:
 	Database();
-	Database(const Database&) {};
-	Database& operator=(const Database&) {};
+	Database(const Database&) = delete;
+	Database& operator=(const Database&) = delete;
 	string generateSalt();
 	string sha1(string &str);
     void databaseInit();

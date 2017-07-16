@@ -22,6 +22,9 @@ private:
 
 	SessionKeyType _GenerateSessionKey();
 	time_t _getTime();
+
+	Session(const Session&) = delete;
+	Session& operator=(const Session&) = delete;
 };
 
 #endif // !_SESSION_H
