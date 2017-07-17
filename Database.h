@@ -39,9 +39,39 @@ private:
     void databaseInit();
 
 	static Database* instance;
-
-
 };
 
+//使用智能指针管理
+class RedisReplyCls {
+public:
+	RedisReplyCls() :replyPtr(nullptr) {
 
+	}
+	explicit RedisReplyCls(redisReply* p) :replyPtr(p,freeReplyObject){
+	}
+
+	RedisReplyCls& operator=(redisReply* p) {
+		replyPtr = shared_ptr<redisReply>(p,freeReplyObject);
+		return *this;
+	}
+
+	redisReply* operator->() {
+		return replyPtr.get();
+	}
+
+	redisReply& operator*() {
+		return *(replyPtr.get());
+	}
+
+    int redisGetReplyCls(redisContext *db){
+        redisReply *reply;
+        int r = redisGetReply(db,(void**)&reply);
+        if(r == REDIS_OK)
+            replyPtr = shared_ptr<redisReply>(reply,freeReplyObject);
+        return r;
+    }
+
+private:
+	shared_ptr<redisReply> replyPtr;
+};
 #endif //TEST_DATABASE_H

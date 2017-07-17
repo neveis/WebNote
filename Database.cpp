@@ -63,11 +63,11 @@ int Database::addUser(string& userName, string& password) {
         return 0;
     }
 
-    redisReply *reply;
+    RedisReplyCls reply;
     reply = (redisReply*) redisCommand(db,"GET user:uid");
     //if(reply->type == REDIS_REPLY_ERROR){};
     int uid = atoi(reply->str) + 1;
-    freeReplyObject(reply);
+
 
     cout << "Add user: " << userName << " uid: " << uid  << endl;
 
@@ -76,21 +76,23 @@ int Database::addUser(string& userName, string& password) {
     string temp = password + salt;
     string passSha1 = sha1(temp);
 
+    //redisReply *reply;
     redisAppendCommand(db,"HSET nametoid %s %d",userName.c_str(),uid);
     redisAppendCommand(db,"SET user:%d:username %s",uid,userName.c_str());
     redisAppendCommand(db,"SET user:%d:password %s",uid,passSha1.c_str());
     redisAppendCommand(db,"SET user:%d:salt %s",uid,salt.c_str());
     redisAppendCommand(db,"INCR user:uid");
-    redisGetReply(db,(void**)&reply); //==REDIS_OK
-    freeReplyObject(reply);
-    redisGetReply(db,(void**)&reply);
-    freeReplyObject(reply);
-    redisGetReply(db,(void**)&reply);
-    freeReplyObject(reply);
-    redisGetReply(db,(void**)&reply);
-    freeReplyObject(reply);
-    redisGetReply(db,(void**)&reply);
-    freeReplyObject(reply);
+    reply.redisGetReplyCls(db); //==REDIS_OK
+    //freeReplyObject(reply);
+    reply.redisGetReplyCls(db);
+    //freeReplyObject(reply);
+    reply.redisGetReplyCls(db);
+    //freeReplyObject(reply);
+    reply.redisGetReplyCls(db);
+    //freeReplyObject(reply);
+    reply.redisGetReplyCls(db);
+    //freeReplyObject(reply);
+
     /*
     reply = (redisReply*) redisCommand(db,"HSET nametoid %s %d",userName.c_str(),uid);
     //if(reply->type == REDIS_REPLY_ERROR){}
@@ -106,8 +108,7 @@ int Database::addUser(string& userName, string& password) {
 }
 
 bool Database::checkUserExist(string& userName) {
-    redisReply *reply;
-
+    RedisReplyCls reply;
     reply = (redisReply *)redisCommand(db,"HGET nametoid %s",userName.c_str());
     bool result = false;
 
@@ -115,7 +116,6 @@ bool Database::checkUserExist(string& userName) {
         result = true;
     }
 
-    freeReplyObject(reply);
     return result;
 }
 
@@ -127,14 +127,14 @@ int Database::signin(const string &userName, const string &password) {
 
 
     string passSha1;
-    redisReply *reply;
+    //redisReply *reply;
+    RedisReplyCls reply;
     reply = (redisReply*) redisCommand(db,"GET user:%d:password",uid);
     passSha1 = reply->str;
-    freeReplyObject(reply);
+
     string salt;
     reply = (redisReply*) redisCommand(db,"GET user:%d:salt",uid);
     salt = reply->str;
-    freeReplyObject(reply);
 
     string temp = password + salt;
     string pass = sha1(temp);
@@ -152,7 +152,8 @@ int Database::signin(const string &userName, const string &password) {
  * if user doesn't exist,return 0;
  */
 int Database::getUserId(const string &userName) {
-    redisReply *reply;
+    RedisReplyCls reply;
+    //redisReply *reply;
     int uid;
     reply = (redisReply*)redisCommand(db,"HGET nametoid %s",userName.c_str());
     if(reply->type == REDIS_REPLY_NIL || reply->type == REDIS_REPLY_ERROR){
@@ -160,13 +161,14 @@ int Database::getUserId(const string &userName) {
     }else{
         uid = atoi(reply->str);
     }
-    freeReplyObject(reply);
+    //freeReplyObject(reply);
 
     return uid;
 }
 
 string Database::getUserName(int uid) {
-    redisReply *reply;
+    RedisReplyCls reply;
+    //redisReply *reply;
     reply = (redisReply*)redisCommand(db,"GET user:%d:username",uid);
     string username;
     if(reply->type == REDIS_REPLY_NIL || reply->type == REDIS_REPLY_ERROR){
@@ -174,13 +176,14 @@ string Database::getUserName(int uid) {
     }else{
         username = reply->str;
     }
-    freeReplyObject(reply);
+    //freeReplyObject(reply);
 
     return username;
 }
 
 long Database::createNote(int uid, string &title, string &content,int did) {
-    redisReply * reply;
+    RedisReplyCls reply;
+    //redisReply * reply;
     int nid;
     reply = (redisReply*) redisCommand(db,"GET note:nid");
     if(reply->type == REDIS_REPLY_NIL || reply->type == REDIS_REPLY_ERROR){
@@ -188,7 +191,7 @@ long Database::createNote(int uid, string &title, string &content,int did) {
     }else{
         nid = atoi(reply->str) + 1;
     }
-    freeReplyObject(reply);
+    //freeReplyObject(reply);
 
     if(!nid){
         return nid;
@@ -205,29 +208,30 @@ long Database::createNote(int uid, string &title, string &content,int did) {
     redisAppendCommand(db,"INCR note:nid");
     redisAppendCommand(db,"LPUSH user:%d:noteList %d",uid,nid);
 
-    redisGetReply(db,(void**)&reply);
-    freeReplyObject(reply);
-    redisGetReply(db,(void**)&reply);
-    freeReplyObject(reply);
-    redisGetReply(db,(void**)&reply);
-    freeReplyObject(reply);
-    redisGetReply(db,(void**)&reply);
-    freeReplyObject(reply);
-    redisGetReply(db,(void**)&reply);
-    freeReplyObject(reply);
-    redisGetReply(db,(void**)&reply);
-    freeReplyObject(reply);
-    redisGetReply(db,(void**)&reply);
-    freeReplyObject(reply);
-    redisGetReply(db,(void**)&reply);
-    freeReplyObject(reply);
+    reply.redisGetReplyCls(db);
+    //freeReplyObject(reply);
+    reply.redisGetReplyCls(db);
+    //freeReplyObject(reply);
+    reply.redisGetReplyCls(db);
+    //freeReplyObject(reply);
+    reply.redisGetReplyCls(db);
+    //freeReplyObject(reply);
+    reply.redisGetReplyCls(db);
+    //freeReplyObject(reply);
+    reply.redisGetReplyCls(db);
+    //freeReplyObject(reply);
+    reply.redisGetReplyCls(db);
+    //freeReplyObject(reply);
+    reply.redisGetReplyCls(db);
+    //freeReplyObject(reply);
 
     return nid;
 
 }
 
 note_ptr Database::getNote(int nid){
-    redisReply* reply;
+    RedisReplyCls reply;
+    //redisReply* reply;
 
     redisAppendCommand(db,"GET note:%d:title",nid);
     redisAppendCommand(db,"GET note:%d:content",nid);
@@ -235,13 +239,13 @@ note_ptr Database::getNote(int nid){
     note_ptr note = std::make_shared<NOTE_STRUCT>();
     note->nid = nid;
 
-    redisGetReply(db,(void**)&reply);
+    reply.redisGetReplyCls(db);
     note->title = reply->str;
-    freeReplyObject(reply);
+    //freeReplyObject(reply);
 
-    redisGetReply(db,(void**)&reply);
+    reply.redisGetReplyCls(db);
     note->content = reply->str;
-    freeReplyObject(reply);
+    //freeReplyObject(reply);
 
     return note;
 }
@@ -249,7 +253,7 @@ note_ptr Database::getNote(int nid){
 int Database::getAllNote(int uid, note_ptr **notes) {
     int count;
 
-    redisReply* reply;
+    RedisReplyCls reply;
     reply = (redisReply*) redisCommand(db,"LRANGE user:%d:noteList 0 -1",uid);
 
     count = reply->elements;
@@ -258,7 +262,7 @@ int Database::getAllNote(int uid, note_ptr **notes) {
         (*notes)[i] = getNote(atoi(reply->element[i]->str));
     }
 
-    freeReplyObject(reply);
+    //freeReplyObject(reply);
 
     return count;
 }
@@ -266,43 +270,35 @@ int Database::getAllNote(int uid, note_ptr **notes) {
 
 
 bool Database::updateNote(int nid, string &title, string &content, int did) {
-    redisReply *reply;
+    RedisReplyCls reply;
 
     time_t modifiedTime = time(nullptr);
     redisAppendCommand(db,"set note:%d:title %s",nid,title.c_str());
     redisAppendCommand(db,"set note:%d:content %s",nid,content.c_str());
     redisAppendCommand(db,"set note:%d:modifiedTime %d",nid,modifiedTime);
 
+    if(reply.redisGetReplyCls(db) == REDIS_ERR){
+        return false;
+    }
+    if(reply.redisGetReplyCls(db) == REDIS_ERR){
+        return false;
+    }
+    if(reply.redisGetReplyCls(db) == REDIS_ERR){
+        return false;
+    }
 
-    if(redisGetReply(db,(void**)&reply) == REDIS_ERR){
-        freeReplyObject(reply);
-        return false;
-    }
-    freeReplyObject(reply);
-    if(redisGetReply(db,(void**)&reply) == REDIS_ERR){
-        freeReplyObject(reply);
-        return false;
-    }
-    freeReplyObject(reply);
-    if(redisGetReply(db,(void**)&reply) == REDIS_ERR){
-        freeReplyObject(reply);
-        return false;
-    }
-    freeReplyObject(reply);
     return true;
 }
 
 bool Database::deleteNote(int nid) {
-    redisReply *reply;
+    RedisReplyCls reply;
     int uid;
     //check note exist
     reply = (redisReply*) redisCommand(db,"GET note:%d:uid",nid);
     if(reply->type == REDIS_REPLY_ERROR || reply->type == REDIS_REPLY_NIL){
-        freeReplyObject(reply);
         return false;
     }
     uid = atoi(reply->str);
-    freeReplyObject(reply);
 
     //delete note
     redisAppendCommand(db,"DEL note:%d:title",nid);
@@ -314,8 +310,7 @@ bool Database::deleteNote(int nid) {
     redisAppendCommand(db,"LREM user:%d:noteList 0 %d",uid,nid);
 
     for(int i=0;i<7;i++){
-        redisGetReply(db,(void**)&reply);
-        freeReplyObject(reply);
+        reply.redisGetReplyCls(db);
     }
 
     return true;
@@ -348,20 +343,17 @@ string Database::sha1(string &str) {
 }
 
 bool Database::checkNoteOwner(int nid, int uid) {
-    redisReply *reply;
+    RedisReplyCls reply;
 
     reply = (redisReply*) redisCommand(db,"GET note:%d:uid",nid);
 
     if(reply->type == REDIS_REPLY_NIL || reply->type == REDIS_REPLY_ERROR){
-        freeReplyObject(reply);
         return false;
     }
 
     if(atoi(reply->str) == uid){
-        freeReplyObject(reply);
         return true;
     }else{
-        freeReplyObject(reply);
         return false;
     }
 }
