@@ -8,18 +8,18 @@ using namespace MyWeb;
 using namespace rapidjson;
 
 void signinGet(Response& response, Request& request) {
-    if(request.cookies.find("token")!= request.cookies.end()){
+    if(request.hasCookie("token")){
         Session session;
 
-        SessionInfo *info = session.GetSessionInfo(request.cookies["token"]);
-        if(info == nullptr || info->UID != atoi(request.cookies["UID"].c_str())){
+        SessionInfo *info = session.GetSessionInfo(request.getCookie("token"));
+        if(info == nullptr || info->UID != atoi(request.getCookie("UID").c_str())){
             //remove cookies
             time_t t;
             time(&t);
             t-=60*60*24;
             response.setCookies("UID","",t);
             response.setCookies("token","",t);
-            session.DeleteSession(request.cookies["tooken"]);
+            session.DeleteSession(request.getCookie("token"));
         }else{
             response.redirect("/");
             return;
@@ -56,12 +56,12 @@ void verityTokenPost(Response& response, Request& request){
     Document d;
     d.SetObject();
     try{
-        if (request.cookies.find("token") == request.cookies.end() ||
-            request.cookies.find("UID") == request.cookies.end()){
+        if (!request.hasCookie("token") ||
+            !request.hasCookie("UID")){
             d.AddMember("status",false,d.GetAllocator());
         }else{
-            SessionInfo *info = session.GetSessionInfo(request.cookies["token"]);
-            if (info == nullptr || info->UID != atoi(request.cookies["UID"].c_str())) {
+            SessionInfo *info = session.GetSessionInfo(request.getCookie("token"));
+            if (info == nullptr || info->UID != atoi(request.getCookie("UID").c_str())) {
                 throw IncorrectSessionException();
             }
 
@@ -99,8 +99,8 @@ void verityTokenPost(Response& response, Request& request){
 
 void signinPost(Response& response, Request& request) {
 	Database *db = Database::getInstance();
-	string username = request.body["username"];
-	string password = request.body["password"];
+	string username = request.getBody("username");
+	string password = request.getBody("password");
     Document d;
     d.SetObject();
 	int uid = db->signin(username, password);

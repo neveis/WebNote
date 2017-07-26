@@ -9,9 +9,9 @@ using namespace MyWeb;
 using namespace rapidjson;
 
 void signoutGet(Response& response, Request& request){
-    if(request.cookies.find("token")!= request.cookies.end()) {
+    if(request.hasCookie("token")) {
         Session session;
-        session.DeleteSession(request.cookies["token"]);
+        session.DeleteSession(request.getCookie("token"));
         //remove cookies
         time_t t;
         time(&t);
@@ -26,9 +26,9 @@ void signoutPost(Response& response, Request& request){
     Document d;
     d.SetObject();
     //remove session
-    if(request.cookies.find("token")!= request.cookies.end()) {
+    if(request.hasCookie("token")) {
         Session session;
-        session.DeleteSession(request.cookies["token"]);
+        session.DeleteSession(request.getCookie("token"));
         //remove cookies
         time_t t;
         time(&t);

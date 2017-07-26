@@ -17,18 +17,18 @@ using namespace MyWeb;
 using namespace rapidjson;
 
 void signupGet(Response& response, Request& request) {
-	if(request.cookies.find("token")!= request.cookies.end()){
+	if(request.hasCookie("token")){
 		Session session;
 
-		SessionInfo *info = session.GetSessionInfo(request.cookies["token"]);
-		if(info == nullptr || info->UID != atoi(request.cookies["UID"].c_str())){
+		SessionInfo *info = session.GetSessionInfo(request.getCookie("token"));
+		if(info == nullptr || info->UID != atoi(request.getCookie("UID").c_str())){
 			//remove cookies
 			time_t t;
 			time(&t);
 			t-=60*60*24;
 			response.setCookies("UID","",t);
 			response.setCookies("token","",t);
-			session.DeleteSession(request.cookies["tooken"]);
+			session.DeleteSession(request.getCookie("token"));
 		}else{
 			response.redirect("/");
 			return;
@@ -69,13 +69,13 @@ void signupPost(Response& response, Request& request) {
 	d.SetObject();
 
 	try{
-		if(request.body.find("username") == request.body.end() ||
-				request.body.find("password") == request.body.end()){
+		if(!request.hasBody("username") ||
+				!request.hasBody("password")){
 			throw IncorrectDataException();
 		}
 
-		string username = request.body["username"];
-		string pass = request.body["password"];
+		string username = request.getBody("username");
+		string pass = request.getBody("password");
 
 		if(pass.size()<8){
 			throw IncorrectDataException();
@@ -133,11 +133,11 @@ void checkUserNamePost(Response& response, Request& request){
 	Document d;
 	d.SetObject();
 	try{
-		if(request.body.find("username") == request.body.end()){
+		if(!request.hasBody("username")){
 			throw IncorrectDataException();
 		}
-
-		if(db->checkUserExist(request.body["username"])){
+		string uname = request.getBody("username");
+		if(db->checkUserExist(uname)){
 			d.AddMember("status",false,d.GetAllocator());
 		}else{
 			d.AddMember("status",true,d.GetAllocator());

@@ -13,7 +13,7 @@ void HandlerRegister::Register(MyWeb::Server<MyWeb::HTTP> & server)
 	server.default_resource["^/?(.*)$"]["GET"] = [](Response& response, Request& request) {
 		//string filename = "www/";
 
-		string path = request.path_match[1];
+		string path = request.getPath();
 
 		// 防止使用 `..` 来访问 web/ 目录外的内容
 		int pos =0;

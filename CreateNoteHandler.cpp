@@ -14,18 +14,18 @@ void createNotePost(Response& response, Request& request){
     Document d;
     d.SetObject();
     try {
-        if (request.cookies.find("token") == request.cookies.end() ||
-            request.cookies.find("UID") == request.cookies.end()){
+        if (!request.hasCookie("token") ||
+            !request.hasCookie("UID")){
             throw IncorrectDataException();
         }
 
-        SessionInfo *info = session.GetSessionInfo(request.cookies["token"]);
-        if (info == nullptr || info->UID != atoi(request.cookies["UID"].c_str())) {
+        SessionInfo *info = session.GetSessionInfo(request.getCookie("token"));
+        if (info == nullptr || info->UID != atoi(request.getCookie("UID").c_str())) {
             throw IncorrectSessionException();
         }
 
         Document data;
-        String2Json(request.body["raw"],data);
+        String2Json(request.getRawBody(),data);
         if(!data.HasMember("title") || !data.HasMember("content")){
             throw IncorrectDataException();
         }

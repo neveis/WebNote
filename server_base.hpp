@@ -2,26 +2,16 @@
 #define SERVER_BASE_HPP
 
 #include <boost/asio.hpp>
-
 #include <regex>
 #include <unordered_map>
 #include <thread>
 #include <iostream>
 #include <ctime>
+#include "Request.h"
 
 namespace MyWeb {
    
 	typedef std::unordered_map<std::string, std::string> Cookies;
-
-	struct Request {
-         std::string method, path, http_version,queryStr;
-         std::shared_ptr<std::istream> content;
-         std::unordered_map<std::string,std::string> header;
-		 std::unordered_map<std::string, std::string> query;
-		 std::unordered_map<std::string, std::string> body;
-		 Cookies cookies;
-         std::smatch path_match;    
-	};
 
 	struct SetCookieStruct{
 		std::string value;
@@ -136,69 +126,7 @@ namespace MyWeb {
 		std::vector<std::thread> threads;
 
 		virtual void accept(){}
-
-		Cookies parse_cookies(std::string cookiesStr) const {
-			Cookies cookies;
-			std::regex e("( |^)(.*?)=([^;]*)(;|$)");
-			std::smatch match;
-			while (std::regex_search(cookiesStr, match, e)) {
-				cookies[match[2]] = match[3];
-				cookiesStr = match.suffix();
-			}
-
-			return cookies;
-		}
-
-		Request parse_request(std::istream& stream) const{
-			Request request;
-
-			std::regex e("^([^ ]*) ([^ ]*) HTTP/([^ ]*)$");
-
-			std::smatch sub_match;
-
-			std::string line;
-			getline(stream,line);
-			line.pop_back();
-
-			if(std::regex_match(line,sub_match,e)){
-				request.method = sub_match[1];
-				request.path = sub_match[2];
-				request.http_version = sub_match[3];
-				
-				//匹配path
-				std::regex r("^(/.*?)(\\?(.*))?$");
-				std::smatch match;
-				std::string strTemp = sub_match[2];
-				std::regex_match(strTemp, match, r);
-				request.path = match[1];
-				request.queryStr = match[3];
-
-				//解析query
-				std::regex r1("^(.*?)=(.*?)(&|$)");
-				std::smatch match2;
-				strTemp = request.queryStr;
-				while (regex_search(strTemp, match2, r1)) {
-					request.query[match2[1]] = match2[2];
-					strTemp = match2.suffix();
-				}
-
-				bool matched;
-				e = "^([^:]*): ?(.*)$";
-				do {
-					getline(stream,line);
-					line.pop_back();
-					matched=std::regex_match(line,sub_match,e);
-					if(matched){
-						request.header[sub_match[1]] = sub_match[2];
-						if (sub_match[1] == "Cookie") {
-							request.cookies = parse_cookies(sub_match[2]);
-						}
-					}
-				}while(matched==true);
-			}
-			return request;
-		}
-
+		
 		void process_request_and_respond(std::shared_ptr<socket_type> socket) const{
 			auto read_buffer = std::make_shared<boost::asio::streambuf>();
 			
@@ -208,30 +136,24 @@ namespace MyWeb {
 					size_t total = read_buffer->size();
 					std::istream stream(read_buffer.get());
 
-					auto request = std::make_shared<Request>();
-					*request = parse_request(stream);
+					std::shared_ptr<Request> request = parseRequest(stream);
 
 					size_t num_additional_bytes = total - bytes_transferred;
 
-					if(request->header.count("Content-Length")>0){
+					if(request->getHeader("Content-Length").size()>0){
 						boost::asio::async_read(*socket,*read_buffer,
-						boost::asio::transfer_exactly(std::stoull(request->header["Content-Length"])- num_additional_bytes),
+						boost::asio::transfer_exactly(std::stoull(request->getHeader("Content-Length"))- num_additional_bytes),
 						[this,socket,read_buffer,request](const boost::system::error_code& ec,size_t bytes_transferred){
 							if(!ec){
-								request->content = std::shared_ptr<std::istream>(new std::istream(read_buffer.get()));
+								auto bodyStream = std::shared_ptr<std::istream>(new std::istream(read_buffer.get()));
 								//解析body
-								std::regex r("^(.*?)=(.*?)(&|$)");
-								std::smatch match;
-                                std::string &rawstr = request->body["raw"];
+                                std::string rawstr;
                                 std::string strTemp;
-                                while(std::getline(*request->content,strTemp)) {
+                                while(std::getline(*bodyStream,strTemp)) {
                                     rawstr.append(strTemp);
                                 }
-                                strTemp = rawstr;
-								while (regex_search(strTemp, match, r)) {
-									request->body[match[1]] = match[2];
-                                    strTemp = match.suffix();
-								}
+                                request->setRawBody(rawstr);
+
 								respond(socket,request);
 							}
 						});
@@ -244,12 +166,13 @@ namespace MyWeb {
 
 	    void respond(std::shared_ptr<socket_type> socket, std::shared_ptr<Request> request) const {
             // 对请求路径和方法进行匹配查找，并生成响应
+            std::string path = request->getPath();
             for(auto res_it: all_resources) {
                 std::regex e(res_it->first);
                 std::smatch sm_res;
-                if(std::regex_match(request->path, sm_res, e)) {
-                    if(res_it->second.count(request->method)>0) {
-                        request->path_match = move(sm_res);
+                if(std::regex_match(path, sm_res, e)) {
+                    if(res_it->second.count(request->getMethod())>0) {
+                        //request->path_match = move(sm_res);
 						
                         // 会被推导为 std::shared_ptr<boost::asio::streambuf>
                         auto write_buffer = std::make_shared<boost::asio::streambuf>();
@@ -257,14 +180,14 @@ namespace MyWeb {
 						auto response = std::make_shared<Response>();
 						response->writeBuf = &wb;
 
-                        res_it->second[request->method](*response, *request);
+                        res_it->second[request->getMethod()](*response, *request);
 						response->write();
 
                         // 在 lambda 中捕获 write_buffer 使其不会再 async_write 完成前被销毁
                         boost::asio::async_write(*socket, *write_buffer,
                         [this, socket, request, write_buffer](const boost::system::error_code& ec, size_t bytes_transferred) {
                             //HTTP 持久连接(HTTP 1.1):
-                            if(!ec && stof(request->http_version)>1.05)
+                            if(!ec && stof(request->getHttpVersion())>1.05)
                                 process_request_and_respond(socket);
                         });
                         return;
