@@ -3,9 +3,14 @@
 
 #include "Handler.h"
 
+//添加一个静态函数用于注册处理函数
+
 class HandlerRegister {
 public:
-	HandlerRegister(MyWeb::Server<MyWeb::HTTP> & server);
+	static void Register(MyWeb::Server<MyWeb::HTTP>& server);
+
+private:
+	HandlerRegister();
 	~HandlerRegister();
 };
 

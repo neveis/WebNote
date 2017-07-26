@@ -6,8 +6,7 @@ using namespace MyWeb;
 int main(){
 
 	Server<HTTP> server(10080,4);
-    HandlerRegister *hr = new HandlerRegister(server);
-	delete hr;
+	HandlerRegister::Register(server);
 
     std::cout << "server start on 10080" << std::endl;
 	server.start();

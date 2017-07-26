@@ -16,10 +16,6 @@
 #include "Exception.hpp"
 #include "struct.h"
 
-#define NO_COPYABLE(Class)	\
-Class(const Class&){};		\
-Class &operator=(const Class &) {};
-
 class Handler {
 public:
 	Handler() {};
@@ -33,11 +29,7 @@ private:
 void String2Json(std::string const& str, rapidjson::Document &d);
 void Json2String(rapidjson::Document &d, std::string &str);
 
-#define REGISTER_HANDLER(server,handlerName)		\
-{													\
-	Handler* handler = new handlerName(server);		\
-	delete handler;									\
-}
+#define REGISTER_HANDLER(server,handlerName) {handlerName h(server);}
 
 #endif // !_HANDLER_H
 
