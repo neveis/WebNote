@@ -16,49 +16,6 @@ using namespace std;
 using namespace MyWeb;
 using namespace rapidjson;
 
-void signupGet(Response& response, Request& request) {
-	if(request.hasCookie("token")){
-		Session session;
-
-		SessionInfo *info = session.GetSessionInfo(request.getCookie("token"));
-		if(info == nullptr || info->UID != atoi(request.getCookie("UID").c_str())){
-			//remove cookies
-			time_t t;
-			time(&t);
-			t-=60*60*24;
-			response.setCookies("UID","",t);
-			response.setCookies("token","",t);
-			session.DeleteSession(request.getCookie("token"));
-		}else{
-			response.redirect("/");
-			return;
-		}
-	}
-
-	string filename = "view/signup.html";
-	ifstream ifs;
-
-	ifs.open(filename, ifstream::in);
-
-	if (ifs) {
-		ifs.seekg(0, ios::end);
-		size_t length = ifs.tellg();
-
-		ifs.seekg(0, ios::beg);
-
-		// 文件内容拷贝到 response-stream 中，不应该用于大型文件
-		response.body << ifs.rdbuf();
-
-		ifs.close();
-	}
-	else {
-		// 文件不存在时，返回无法打开文件
-		string content = "Could not open file " + filename;
-		response.status = 400;
-		response.body << content;
-	}
-}
-
 void signupPost(Response& response, Request& request) {
 
 
@@ -105,8 +62,8 @@ void signupPost(Response& response, Request& request) {
 			time_t t;
 			time(&t);
 			t = t + 30*24*60*60;
-			response.setCookies("UID",to_string(uid));
-			response.setCookies("token",sessionkey,t);
+			response.setCookie("UID",to_string(uid));
+			response.setCookie("token",sessionkey,t);
 			d.AddMember("status", true, d.GetAllocator());
 		}
 	}catch(exception const& e){
@@ -122,8 +79,8 @@ void signupPost(Response& response, Request& request) {
 
 	string resContent;
 	Json2String(d, resContent);
-	response.type = "application/json";
-	response.body << resContent;
+	response.setContentType("application/json");
+	response << resContent;
 
 }
 
@@ -154,8 +111,8 @@ void checkUserNamePost(Response& response, Request& request){
 
 	string content;
 	Json2String(d, content);
-	response.type = "application/json";
-	response.body << content;
+	response.setContentType("application/json");
+	response << content;
 }
 
 SignupHandler::SignupHandler(Server<HTTP> & server)

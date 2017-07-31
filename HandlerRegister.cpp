@@ -53,13 +53,15 @@ void HandlerRegister::Register(MyWeb::Server<MyWeb::HTTP> & server)
 			ifs.seekg(0, ios::beg);
 
 			// 文件内容拷贝到 response-stream 中，不应该用于大型文件
-			response.body << ifs.rdbuf();
+			stringstream ss;
+			ss << ifs.rdbuf();
+			response << ss.str();
 
 			ifs.close();
 		}
 		else {
 			// 文件不存在时，返回无法打开文件
-			response.status = 404;
+			response.setStatus(404);
 		}
 	};
 }

@@ -8,77 +8,8 @@
 #include <iostream>
 #include <ctime>
 #include "Request.h"
-
+#include "Response.h"
 namespace MyWeb {
-   
-	typedef std::unordered_map<std::string, std::string> Cookies;
-
-	struct SetCookieStruct{
-		std::string value;
-		std::string expires;
-	};
-	struct Response {
-		int status = 200;
-		std::stringstream body;
-		std::unordered_map<std::string,SetCookieStruct> cookies;
-		std::string type;
-		std::string location;
-		std::ostream *writeBuf;
-		void write() {
-			switch (status)
-			{
-				case 200:
-					*writeBuf << "HTTP/1.1 200 OK\r\n";
-					break;
-				case 400:
-					*writeBuf << "HTTP/1.1 400 Bad Request\r\n";
-					break;
-				case 404:
-					*writeBuf << "HTTP/1.1 404 Not Found\r\n";
-					break;
-				case 302:
-					*writeBuf << "HTTP/1.1 302 Found\r\n";
-					break;
-				default:
-					break;
-			}
-			*writeBuf << "Connection:Keep-Alive\r\n";
-			if (!type.empty()) {
-				*writeBuf << "Content-Type: " << type << "\r\n";
-			}
-			if(!location.empty()){
-				*writeBuf << "Location: " << location << "\r\n";
-			}
-			for(auto it = cookies.begin();it != cookies.end();++it){
-				SetCookieStruct & cookieStruct = it->second;
-
-				*writeBuf << "Set-Cookie: " << it->first << "=" << cookieStruct.value;
-				if(cookieStruct.expires.size()){
-					*writeBuf << "; " << "expires=" << cookieStruct.expires;
-				}
-
-				*writeBuf << "\r\n";
-			}
-			std::string content = body.str();
-			*writeBuf << "Content-Length: " << content.length() << "\r\n\r\n";
-			*writeBuf << content;
-		}
-		void setCookies(std::string const& key,std::string const& value){
-			cookies[key].value = value;
-		}
-		void setCookies(std::string const& key,std::string const& value, time_t const& expires){
-			cookies[key].value = value;
-			struct tm *ptr;
-			char buf[50];
-			ptr = gmtime(&expires);
-			strftime(buf,49,"%a, %d-%b-%y %T GMT",ptr);
-			cookies[key].expires = buf;
-		}
-		void redirect(std::string const& url){
-			status = 302;
-			location = url;
-		}
-	};
 
 	typedef std::map<std::string, std::unordered_map<std::string,
 		    std::function<void(Response&, Request&)>>> resource_type;
@@ -178,10 +109,10 @@ namespace MyWeb {
                         auto write_buffer = std::make_shared<boost::asio::streambuf>();
                         std::ostream wb(write_buffer.get());
 						auto response = std::make_shared<Response>();
-						response->writeBuf = &wb;
+						//response->writeBuf = &wb;
 
                         res_it->second[request->getMethod()](*response, *request);
-						response->write();
+						*response >> wb;
 
                         // 在 lambda 中捕获 write_buffer 使其不会再 async_write 完成前被销毁
                         boost::asio::async_write(*socket, *write_buffer,

@@ -75,8 +75,8 @@ void fetchNotePost(Response& response, Request& request){
         time_t t;
         time(&t);
         t -= 60*60*24;
-        response.setCookies("UID","",t);
-        response.setCookies("token","",t);
+        response.setCookie("UID","",t);
+        response.setCookie("token","",t);
     }catch(exception const& e){
         d.AddMember("status", false, d.GetAllocator());
         Value message;
@@ -90,8 +90,8 @@ void fetchNotePost(Response& response, Request& request){
 
     string res;
     Json2String(d,res);
-    response.type = "application/json";
-    response.body << res;
+    response.setContentType("application/json");
+    response << res;
 }
 
 FetchNoteHandler::FetchNoteHandler(MyWeb::Server<MyWeb::HTTP> &server) {

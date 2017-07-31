@@ -16,8 +16,8 @@ void signoutGet(Response& response, Request& request){
         time_t t;
         time(&t);
         t -= 60 * 60 * 24;
-        response.setCookies("UID", "", t);
-        response.setCookies("token", "", t);
+        response.setCookie("UID", "", t);
+        response.setCookie("token", "", t);
     }
     response.redirect("/");
 }
@@ -33,8 +33,8 @@ void signoutPost(Response& response, Request& request){
         time_t t;
         time(&t);
         t -= 60 * 60 * 24;
-        response.setCookies("UID", "", t);
-        response.setCookies("token", "", t);
+        response.setCookie("UID", "", t);
+        response.setCookie("token", "", t);
         d.AddMember("status",true,d.GetAllocator());
     }else{
         d.AddMember("status",false,d.GetAllocator());
@@ -43,8 +43,8 @@ void signoutPost(Response& response, Request& request){
     string content;
     Json2String(d,content);
 
-    response.type = "application/json";
-    response.body << content;
+    response.setContentType("application/json");
+    response << content;
 
 }
 

@@ -17,8 +17,8 @@ void signinGet(Response& response, Request& request) {
             time_t t;
             time(&t);
             t-=60*60*24;
-            response.setCookies("UID","",t);
-            response.setCookies("token","",t);
+            response.setCookie("UID","",t);
+            response.setCookie("token","",t);
             session.DeleteSession(request.getCookie("token"));
         }else{
             response.redirect("/");
@@ -37,16 +37,17 @@ void signinGet(Response& response, Request& request) {
 
 		ifs.seekg(0, ios::beg);
 
-		//
-		response.body << ifs.rdbuf();
+        stringstream ss;
+        ss << ifs.rdbuf();
+		response << ss.str();
 
 		ifs.close();
 	}
 	else {
 		//
 		string content = "Could not open file " + filename;
-		response.status = 400;
-		response.body << content;
+		response.setStatus(400);
+		response << content;
 	}
 }
 
@@ -84,8 +85,8 @@ void verityTokenPost(Response& response, Request& request){
         time_t t;
         time(&t);
         t -= 60*60*24;
-        response.setCookies("UID","",t);
-        response.setCookies("token","",t);
+        response.setCookie("UID","",t);
+        response.setCookie("token","",t);
 
     }catch(...){
         d.AddMember("status",false,d.GetAllocator());
@@ -93,8 +94,8 @@ void verityTokenPost(Response& response, Request& request){
 
     string content;
     Json2String(d, content);
-    response.type = "application/json";
-    response.body << content;
+    response.setContentType("application/json");
+    response << content;
 }
 
 void signinPost(Response& response, Request& request) {
@@ -117,15 +118,15 @@ void signinPost(Response& response, Request& request) {
         time(&t);
         //one month
         t = t + 30*24*60*60;
-        response.setCookies("UID",to_string(uid));
-        response.setCookies("token",sessionkey,t);
+        response.setCookie("UID",to_string(uid));
+        response.setCookie("token",sessionkey,t);
         d.AddMember("status", true, d.GetAllocator());
     }
 
 	string content;
 	Json2String(d, content);
-    response.type = "application/json";
-	response.body << content;
+    response.setContentType( "application/json");
+	response << content;
 }
 
 SigninHandler::SigninHandler(MyWeb::Server<MyWeb::HTTP> & server)
