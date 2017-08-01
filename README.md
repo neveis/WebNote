@@ -49,3 +49,6 @@ set note:nid 1000
 ./dist/WebNote
 ```
 默认端口为10080。
+
+演示地址：neveis.com:10080
+不一定在启动中。
