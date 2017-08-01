@@ -6,7 +6,7 @@
 #ifndef _HANDLER_H
 #define _HANDLER_H
 
-#include "server_http.hpp"
+#include "ServerHttp.h"
 #include <string>
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>

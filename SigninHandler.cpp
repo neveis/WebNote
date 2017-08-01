@@ -129,10 +129,10 @@ void signinPost(Response& response, Request& request) {
 	response << content;
 }
 
-SigninHandler::SigninHandler(MyWeb::Server<MyWeb::HTTP> & server)
+SigninHandler::SigninHandler(ServerHttp & server)
 {
-	server.resource["^/signin/?$"]["POST"] = signinPost;
-    server.resource["^/verity/?$"]["POST"] = verityTokenPost;
+	server.addResource("^/signin/?$", "POST", signinPost);
+    server.addResource("^/verity/?$", "POST", verityTokenPost);
 
 }
 

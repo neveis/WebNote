@@ -48,9 +48,9 @@ void signoutPost(Response& response, Request& request){
 
 }
 
-SignoutHandler::SignoutHandler(MyWeb::Server<MyWeb::HTTP> &server) {
-    server.resource["^/signout/?$"]["GET"] = signoutGet;
-    server.resource["^/signout/?$"]["POST"] = signoutPost;
+SignoutHandler::SignoutHandler(ServerHttp &server) {
+    server.addResource("^/signout/?$","GET",signoutGet);
+    server.addResource("^/signout/?$","POST",signoutPost);
 }
 
 SignoutHandler::~SignoutHandler() {

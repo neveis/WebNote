@@ -7,7 +7,7 @@
 
 class SignupHandler:public Handler {
 public:
-	SignupHandler(MyWeb::Server<MyWeb::HTTP> &server);
+	SignupHandler(MyWeb::ServerHttp &server);
 	~SignupHandler() {};
 };
 

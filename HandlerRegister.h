@@ -7,7 +7,7 @@
 
 class HandlerRegister {
 public:
-	static void Register(MyWeb::Server<MyWeb::HTTP>& server);
+	static void Register(MyWeb::ServerHttp& server);
 
 private:
 	HandlerRegister();

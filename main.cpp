@@ -1,11 +1,11 @@
-#include "server_http.hpp"
 #include <iostream>
+#include "ServerHttp.h"
 #include "HandlerRegister.h"
 using namespace MyWeb;
 
 int main(){
 
-	Server<HTTP> server(10080,4);
+	ServerHttp server(10080,4);
 	HandlerRegister::Register(server);
 
     std::cout << "server start on 10080" << std::endl;

@@ -77,8 +77,8 @@ void createNotePost(Response& response, Request& request){
     response << res;
 }
 
-CreateNoteHandler::CreateNoteHandler(MyWeb::Server<MyWeb::HTTP> &server) {
-    server.resource["^/create/?$"]["POST"] = createNotePost;
+CreateNoteHandler::CreateNoteHandler(MyWeb::ServerHttp &server) {
+    server.addResource("^/create/?$","POST",createNotePost);
 }
 
 CreateNoteHandler::~CreateNoteHandler() {

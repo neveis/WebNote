@@ -1,7 +1,3 @@
-//
-// Created by root on 5/30/17.
-//
-
 #ifndef WEBNOTE_CREATENOTEHANDLER_H
 #define WEBNOTE_CREATENOTEHANDLER_H
 
@@ -9,7 +5,7 @@
 
 class CreateNoteHandler:public Handler {
 public:
-    CreateNoteHandler(MyWeb::Server<MyWeb::HTTP> & server);
+    CreateNoteHandler(MyWeb::ServerHttp & server);
     ~CreateNoteHandler();
 };
 

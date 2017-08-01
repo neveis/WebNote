@@ -8,7 +8,7 @@
 
 class UpdateNoteHandler :public Handler{
 public:
-    UpdateNoteHandler(MyWeb::Server<MyWeb::HTTP> & server);
+    UpdateNoteHandler(MyWeb::ServerHttp & server);
     ~UpdateNoteHandler();
 };
 

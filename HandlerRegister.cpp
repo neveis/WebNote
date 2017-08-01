@@ -2,17 +2,17 @@
 #include "HandlerRegister.h"
 #include "HandlerConfigure.h"
 #include <boost/filesystem.hpp>
+#include <sstream>
 
 using namespace std;
 using namespace MyWeb;
 
-void HandlerRegister::Register(MyWeb::Server<MyWeb::HTTP> & server)
+void HandlerRegister::Register(MyWeb::ServerHttp & server)
 {
 	REGISTER_HANDLERS(server);
 
-	server.default_resource["^/?(.*)$"]["GET"] = [](Response& response, Request& request) {
+	server.addDefaultResource("^/?(.*)$","GET",[](Response& response, Request& request) {
 		//string filename = "www/";
-
 		string path = request.getPath();
 
 		// 防止使用 `..` 来访问 web/ 目录外的内容
@@ -63,7 +63,7 @@ void HandlerRegister::Register(MyWeb::Server<MyWeb::HTTP> & server)
 			// 文件不存在时，返回无法打开文件
 			response.setStatus(404);
 		}
-	};
+	});
 }
 
 

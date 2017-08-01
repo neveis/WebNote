@@ -8,7 +8,7 @@
 
 class DeleteNoteHandler :public Handler{
 public:
-    DeleteNoteHandler(MyWeb::Server<MyWeb::HTTP> & server);
+    DeleteNoteHandler(MyWeb::ServerHttp & server);
     ~DeleteNoteHandler();
 };
 

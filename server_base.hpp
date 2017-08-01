@@ -104,12 +104,11 @@ namespace MyWeb {
                 if(std::regex_match(path, sm_res, e)) {
                     if(res_it->second.count(request->getMethod())>0) {
                         //request->path_match = move(sm_res);
-						
+
                         // 会被推导为 std::shared_ptr<boost::asio::streambuf>
                         auto write_buffer = std::make_shared<boost::asio::streambuf>();
                         std::ostream wb(write_buffer.get());
 						auto response = std::make_shared<Response>();
-						//response->writeBuf = &wb;
 
                         res_it->second[request->getMethod()](*response, *request);
 						*response >> wb;

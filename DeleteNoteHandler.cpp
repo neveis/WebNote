@@ -66,8 +66,8 @@ void deleteNotePost(Response& response, Request& request){
     response << res;
 }
 
-DeleteNoteHandler::DeleteNoteHandler(MyWeb::Server<MyWeb::HTTP> &server) {
-    server.resource["^/delete/?$"]["POST"] = deleteNotePost;
+DeleteNoteHandler::DeleteNoteHandler(MyWeb::ServerHttp &server) {
+    server.addResource("^/delete/?$","POST",deleteNotePost);
 }
 
 DeleteNoteHandler::~DeleteNoteHandler() {

@@ -115,8 +115,8 @@ void checkUserNamePost(Response& response, Request& request){
 	response << content;
 }
 
-SignupHandler::SignupHandler(Server<HTTP> & server)
+SignupHandler::SignupHandler(ServerHttp & server)
 {
-	server.resource["^/signup/?$"]["POST"] = signupPost;
-	server.resource["^/checkuname/?$"]["POST"] = checkUserNamePost;
+	server.addResource("^/signup/?$","POST", signupPost);
+	server.addResource("^/checkuname/?$","POST",checkUserNamePost);
 }

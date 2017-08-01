@@ -9,7 +9,7 @@
 
 class SignoutHandler : public Handler {
 public:
-    SignoutHandler(MyWeb::Server<MyWeb::HTTP> & server);
+    SignoutHandler(MyWeb::ServerHttp & server);
     ~SignoutHandler();
 };
 

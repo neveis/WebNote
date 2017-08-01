@@ -69,8 +69,8 @@ void updateNotePost(Response& response, Request& request){
     response << res;
 }
 
-UpdateNoteHandler::UpdateNoteHandler(MyWeb::Server<MyWeb::HTTP> &server) {
-    server.resource["^/update/?$"]["POST"] = updateNotePost;
+UpdateNoteHandler::UpdateNoteHandler(ServerHttp &server) {
+    server.addResource("^/update/?$", "POST", updateNotePost);
 }
 
 UpdateNoteHandler::~UpdateNoteHandler() {

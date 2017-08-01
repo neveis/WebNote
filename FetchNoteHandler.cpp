@@ -94,8 +94,8 @@ void fetchNotePost(Response& response, Request& request){
     response << res;
 }
 
-FetchNoteHandler::FetchNoteHandler(MyWeb::Server<MyWeb::HTTP> &server) {
-    server.resource["^/fetch/?$"]["POST"] = fetchNotePost;
+FetchNoteHandler::FetchNoteHandler(MyWeb::ServerHttp &server) {
+    server.addResource("^/fetch/?$","POST",fetchNotePost);
 }
 
 FetchNoteHandler::~FetchNoteHandler() {
